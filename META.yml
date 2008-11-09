@@ -1,0 +1,19 @@
+---
+name: Padre-Plugin-Parrot
+version: 0.16
+author:
+  - 'Gabor Szabo <szabgab@gmail.com>'
+abstract: Experimental Padre plugin that runs on Parrot
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+build_requires:
+  Test::More: 0
+provides:
+  Padre::Plugin::Parrot:
+    file: lib/Padre/Plugin/Parrot.pm
+    version: 0.16
+generated_by: Module::Build version 0.280801
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2
