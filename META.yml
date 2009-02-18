@@ -5,7 +5,7 @@ author:
 build_requires:
   Test::More: 0.47
 distribution_type: module
-generated_by: 'Module::Install version 0.77'
+generated_by: 'Module::Install version 0.79'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -13,12 +13,6 @@ meta-spec:
 name: Padre-Plugin-Parrot
 no_index:
   directory:
-    - t
-    - xt
-    - eg
-    - share
-    - inc
-    - privinc
     - inc
     - t
 requires:
@@ -28,4 +22,4 @@ resources:
   homepage: http://padre.perlide.org/
   license: http://dev.perl.org/licenses/
   repository: http://svn.perlide.org/padre/trunk/Padre-Plugin-Parrot
-version: 0.22
+version: 0.23

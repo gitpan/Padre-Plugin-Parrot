@@ -6,7 +6,7 @@ use warnings;
 use Padre::Document ();
 use Padre::Util     ();
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 our @ISA     = 'Padre::Document';
 
 # Slightly less naive way to parse and colorize pasm files
@@ -145,10 +145,10 @@ sub get_command {
 	
 	my $filename = $self->filename;
 
-	if (not $ENV{PARROT_PATH}) {
-		die "PARROT_PATH is not defined. Need to point to trunk of Parrot SVN checkout.\n";
+	if (not $ENV{PARROT_DIR}) {
+		die "PARROT_DIR is not defined. Need to point to trunk of Parrot SVN checkout.\n";
 	}
-	my $parrot = File::Spec->catfile($ENV{PARROT_PATH}, 'parrot');
+	my $parrot = File::Spec->catfile($ENV{PARROT_DIR}, 'parrot');
 	if (not -x $parrot) {
 		die "$parrot is not an executable.\n";
 	}
