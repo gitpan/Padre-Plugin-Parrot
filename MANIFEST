@@ -10,6 +10,8 @@ inc/Module/Install/WriteAll.pm
 lib/Padre/Document/PASM.pm
 lib/Padre/Document/PIR.pm
 lib/Padre/Plugin/Parrot.pm
+lib/Padre/Plugin/Parrot/ColorizeTask.pm
+lib/Padre/Plugin/Parrot/HL.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml

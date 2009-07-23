@@ -1,8 +1,9 @@
 package Padre::Plugin::Parrot;
 use strict;
 use warnings;
+use 5.008;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use Padre::Wx ();
 
@@ -14,12 +15,30 @@ my $parrot;
 
 =head1 NAME
 
-Padre::Plugin::Parrot - Experimental Padre plugin that runs on Parrot
+Padre::Plugin::Parrot - Experimental Padre plugin for Parrot
 
 =head1 SYNOPSIS
 
-After installation when you run Padre there should be a menu option Plugins/Parrot
-with several submenues.
+This Plugin provides several features
+
+=over 4
+
+=item *
+
+Syntax highlighting via the PGE parse tree for languages using PCT - the Parrot Compiler Toolkit
+
+=item *
+
+Syntax highlighting of PIR and PASM files using Perl 5 regular expressions
+
+=item *
+
+Embedding of Parrot to allow extending Padre using languages running in Parrot
+
+=back
+
+After installation you need to enable the plugin via the Plugin Manager of Padre.
+Once that is done there should be a menu option Plugins/Parrot with several submenus.
 
 About is just some short explanation
 
@@ -27,82 +46,72 @@ The other menu options will count the number of characters in the current docume
 using the current Perl 5 interpreter or PASM running on top of Parrot.
 Later we add other implementations running on top of Parrot.
 
-=head1 Parrot integration
+The syntax highlighting provided by this module can be enabled on a perl file-type
+(actually mime-type) base in the Edit/Preferences/Mime-types dialog.
 
-This is an experimental feature.
+=head1 INSTALLATION
 
-Download Parrot (or check it out from its version control)
+This whole plugin is quite experimental. So is the documentation. 
+I hope the plugin can work with released and installed versions of Parrot as well but
+I have never tried that. Let me outline how I install the dependencies.
+
+It is quite simple though it has several steps in it.
+
+Later we'll make this more simple.
+
+I start with Rakudo (the implementation of Perl 6 on Parrot).
+
+=head2 Install Rakudo
+
+ $ cd $HOME
+ $ mkdir work
+ $ cd work
+ $ git clone git://github.com/rakudo/rakudo.git
+ $ cd rakudo
+ $ perl Configure.pl --gen-parrot
+ $ make
+
+=head2 Configure env variables
 
 Configure PARROT_DIR to point to the root of parrot
-
-Configure LD_LIBRARY_PATH
-
-  export LD_LIBRARY_PATH=$PARROT_DIR/blib/lib/
- 
-=head2 Build Parrot
-
-  cd $PARROT_DIR
-  svn up
-  make realclean
-  perl Configure.pl
-  make
-  make test
-
-=head2 Build languages
-
-After building Parrot you can run
-
- make languages
-
-to build all the languages or cd to the directory of
-the individual languages and type C<make>.
-
-=over 4
-
-=item Perl 6 (Rakudo)
-
-In order to be able to run code written in Perl 6,
-after building Parrot do the following:
-
- cd languages/
- git clone http://github.com/rakudo/rakudo.git
- cd rakudo
- perl Configure.pl
- make
-
 Configure RAKUDO_DIR to point to the directory where rakudo was checked out.
-In the above case RAKUDO_DIR=$PARROT_DIR/language/rakudo 
+(I have these in the .bashrc)
 
-See L<https://trac.parrot.org/parrot/ticket/77>
+ $ export PARROT_DIR=$HOME/work/rakudo/parrot
+ $ export RAKUDO_DIR=$HOME/work/rakudo
 
-=item Lua
 
- cd languages/lua
- make 
+Once this is done if you run Padre now you can enable Parrot/PGE highlighting of
+Perl 6 files via the Edit/Preferences/Mime-types dialog.
+
+=head2 Adding Cardinal (Ruby) highlighting
+
+In order to support Ruby highlighting one needs to configure the CARDINAL_DIR 
+environment variable to point to the place where the cardinal.pbc can be located.
+
+  $ cd $HOME/work
+  $ git clone git://github.com/cardinal/cardinal.git
+  $ export CARDINAL_DIR=$HOME/work/cardinal         # add this also to .bashrc
+  $ cd $PARROD_DIR
+  $ mkdir languages
+  $ cd language
+  $ ln -s $CARDINAL_DIR
+  $ cd cardinal
+  $ perl Configure.pl
+  $ make
+
+Once this is done if you run Padre now you can enable Parrot/PGE highlighting of
+Ruby files via the Edit/Preferences/Mime-types dialog.
+
+=head2 Embedding Parrot
+
+=head3 Configure LD_LIBRARY_PATH (also in .bashrc)
+
+ $ export LD_LIBRARY_PATH=$PARROT_DIR/blib/lib/
  
-Currently Lua cannot be embedded. See L<https://trac.parrot.org/parrot/ticket/74>
+=head3 Build Parrot::Embed
 
-
-=item PHP (Pipp)
-
- cd languages/pipp
- make
- 
-See L<https://trac.parrot.org/parrot/ticket/76>
-
-=item Pynie (Python)
-
-See L<https://trac.parrot.org/parrot/ticket/79>
-
-=item Cardinal (Ruby)
-
-See L<https://trac.parrot.org/parrot/ticket/77>
-
-=back
-
-=head2 Build Parrot::Embed
-
-  cd ext/Parrot-Embed/
+  $ cd $PARROT_DIR/ext/Parrot-Embed/
   ./Build realclean
   perl Build.PL
   ./Build
@@ -116,12 +125,70 @@ The test will give a warning like this, but will pass:
 
 Now if you run Padre and enable Padre::Plugin::Parrot 
 it will have an embedded Parrot interpreter that can run
-code written in PASM.
+code written in PIR. (See the Plugins/Parrot/Count Characters...)
+menu options.
+
+
+=head1 Related Tickets in Parrot
+
+L<https://trac.parrot.org/parrot/ticket/77>
+L<https://trac.parrot.org/parrot/ticket/74>
+L<https://trac.parrot.org/parrot/ticket/76>
+L<https://trac.parrot.org/parrot/ticket/79>
+L<https://trac.parrot.org/parrot/ticket/77>
+
+=head1 Adding more highlightings
+
+In order to add more syntax highlighters one needs to
+
+=over 4
+
+=item 1)
+
+make sure the relevant language can compile to a pbc file
+
+=item 2)
+
+add and entry to the @config variable.
+
+=item 3)
+
+add color codes to the missing tokens in L<Padre::Plugin::Parrot::ColorizeTask>
+
+=back
+
+=head1 TODO
+
+=over 4
+
+=item *
+
+Eliminate the need for environment variables
+
+=item *
+
+Make the installations more simple, make sure it can work with released and installed versions of Parrot, Rakudo etc.
+
+=item *
+
+Allow the addition and configuration of more .pbc files (or executables) to @config (and keep it
+in the Padre config database).
+
+=item *
+
+Separate the token lists for the various languages
+L<Padre::Plugin::Parrot::ColorizeTask>
+
+=item *
+
+Automatically colorize any file type if it does not have a specified token to colors table.
+
+=back
 
 
 =head1 COPYRIGHT
 
-Copyright 2008-2009 Gabor Szabo. L<http://www.szabgab.com/>
+Copyright 2008-2009 Gabor Szabo. L<http://szabgab.com/>
 
 =head1 LICENSE
 
@@ -130,21 +197,20 @@ modify it under the same terms as Perl 5 itself.
 
 =cut
 
-my $pod = <<"POD";
+my $pod = <<'POD';
 
 =head1 Parrot
 
 Some text
-L</home/gabor/work/parrot/docs/intro.pod>
+L<$PARROT_DIR/docs/intro.pod>
 
 =cut
 
 POD
 
 sub padre_interfaces {
-    return 'Padre::Plugin'         => 0.26,
+	return 'Padre::Plugin' => 0.41;
 }
-
 
 sub plugin_name {
 	'Parrot';
@@ -153,31 +219,105 @@ sub plugin_name {
 sub menu_plugins_simple {
 	my $self = shift;
 	return $self->plugin_name => [
-		'About'                                       => sub { $self->about },
+		'About' => sub { $self->about },
+
 		#'Help'                                        => \&show_help,
-				
-		"Count characters using Perl5"                   => \&on_try_perl5,
-		"Count characters using PIR in embedded Parrot"  => \&on_try_pir,
+
+		"Count characters using Perl5"                  => \&on_try_perl5,
+		"Count characters using PIR in embedded Parrot" => \&on_try_pir,
 	];
 }
 
 sub registered_documents {
-	'application/x-pasm'  => 'Padre::Document::PASM',
-	'application/x-pir'   => 'Padre::Document::PIR',
+	'application/x-pasm' => 'Padre::Document::PASM', 'application/x-pir' => 'Padre::Document::PIR',;
+}
+
+# TODO, Planning the syntax highlighting feature:
+# -------------------------------
+# let the user regiser 
+# mime-type, Path/to/language.pge, Name, Description?
+# or
+# mime-type, Path/to/language.exe, Name, Description?
+
+# Though as this is only for personal use on the users own computer
+# for now, we don't really need a description field but maybe the user
+# wants to add comments.
+# Name must be ASCII string without 
+# We can recognize if this is a .pge file or an executable 
+# (.exe on windows nothing on Unix) but we might also provide a check-box
+# so the user can configure this.
+
+# We ave this information in a database or config file
+# We read this information at load time and based on this change the 
+# provided_highlighters and highlighting_mime_types functions
+#
+# With the module name being Padre::Plugin::HL::Name  (using the Name the user gave us)
+# the module is virtual, only exists in memory
+
+my @highlighters = (
+	['Padre::Document::PIR',  'PIR in Perl 5',  'PIR syntax highlighting with Perl 5 regular expressions'],
+	['Padre::Document::PASM', 'PASM in Perl 5', 'PASM syntax highlighting with Perl 5 regular expressions'],
+	['Padre::Plugin::Parrot', 'Parrot PGE',     'Using the PGE engine for highlighting'],
+);
+
+my %highlighter_mimes = (
+	'Padre::Document::PIR' => ['application/x-pir'],
+);
+
+# [mime-type,    path-to-pbc-or-exe,  'NameWithoutSpace', 'Description'] 
+my @config;
+if ($ENV{RAKUDO_DIR}) {
+	push @config, ['application/x-perl6', "$ENV{RAKUDO_DIR}/perl6.pbc",       'Perl6', 'Perl 6 via Parrot and perl6.pbc'];
+}
+if ($ENV{CARDINAL_DIR}) {
+	push @config, ['application/x-ruby',  "$ENV{CARDINAL_DIR}/cardinal.pbc",  'Ruby',  'Ruby via Cardinal on Parrot and cardinal.pbc'];
+}
+
+use Padre::Plugin::Parrot::HL;
+foreach my $e (@config) {
+	my ($mime_type, $path, $name, $description) = @$e;
+	next if not -e $path;
+	# TODO check other values as well
+
+	my $pbc	= ($path =~ /\.pbc$/ ? 1 : 0);
+	my $module = 'Parrot::Plugin::HL::' . ($pbc ? 'PBC::' : '') . $name;
+	my $display_name = "Parrot/" . ($pbc ? 'PBC' : 'EXE') . "/$name";
+	{
+		# create virtual namespace and colorize() function.
+		# maybe I only need to create 
+		
+		my $sub = sub { return ($pbc, $path) };
+		my $isa = $module . '::ISA';
+		my $function = $module . '::pbc_path';
+		no strict 'refs';
+		@$isa = ('Padre::Plugin::Parrot::HL');
+		*{$function} = $sub;
+	}
+	push @highlighters, [$module, $display_name, $description];
+	$highlighter_mimes{$module} = [$mime_type];
+}
+
+sub provided_highlighters {
+	return @highlighters;
+}
+
+sub highlighting_mime_types {
+	return %highlighter_mimes;
 }
 
 sub plugin_enable {
 	my $self = shift;
-	
+
 	return if not $ENV{PARROT_DIR};
-	
-	return 1 if $main::parrot; # avoid crash when duplicate calling
-	
+
+	return 1 if $main::parrot;    # avoid crash when duplicate calling
+
 	local @INC = (
 		"$ENV{PARROT_DIR}/ext/Parrot-Embed/blib/lib",
 		"$ENV{PARROT_DIR}/ext/Parrot-Embed/blib/arch",
 		"$ENV{PARROT_DIR}/ext/Parrot-Embed/_build/lib",
-		@INC);
+		@INC
+	);
 
 	# for now we keep the parrot interpreter in a script-global
 	# in $main as if we try to reload the Plugin the embedded parrot will
@@ -195,17 +335,16 @@ sub plugin_enable {
 	return 1;
 }
 
-
 sub on_try_perl5 {
 	my ($main) = @_;
-	
-    my $doc = Padre::Current->document;
+
+	my $doc = Padre::Current->document;
 	my $str = "No file is open";
 	if ($doc) {
-		$str = "Number of characters in the current file: " . length($doc->text_get);
+		$str = "Number of characters in the current file: " . length( $doc->text_get );
 	}
-	
-	Wx::MessageBox( "From Perl 5. $str", "Worksforme", Wx::wxOK|Wx::wxCENTRE, $main );
+
+	Wx::MessageBox( "From Perl 5. $str", "Worksforme", Wx::wxOK | Wx::wxCENTRE, $main );
 	return;
 }
 
@@ -213,12 +352,12 @@ sub on_try_pir {
 	my ($main) = @_;
 
 	my $parrot = $main::parrot;
-	if (not $parrot) {
-		Wx::MessageBox( "Parrot is not available", "No luck", Wx::wxOK|Wx::wxCENTRE, $main );
+	if ( not $parrot ) {
+		Wx::MessageBox( "Parrot is not available", "No luck", Wx::wxOK | Wx::wxCENTRE, $main );
 		return;
 	}
-	
-my $code = <<END_PIR;
+
+	my $code = <<END_PIR;
 .sub on_try_pir
 	.param string code
 
@@ -229,17 +368,17 @@ my $code = <<END_PIR;
 .end
 END_PIR
 
-	my $eval = $parrot->compile( $code );
+	my $eval = $parrot->compile($code);
 	my $sub  = $parrot->find_global('on_try_pir');
 
-    my $doc = Padre::Current->document;
+	my $doc = Padre::Current->document;
 	my $str = "No file is open";
 	if ($doc) {
-		my $pmc  = $sub->invoke( 'PS', $doc->text_get ); 
+		my $pmc = $sub->invoke( 'PS', $doc->text_get );
 		$str = "Number of characters in the current file: " . $pmc->get_string;
 	}
 
-	Wx::MessageBox( "From Parrot using PIR: $str", "Worksforme", Wx::wxOK|Wx::wxCENTRE, $main );
+	Wx::MessageBox( "From Parrot using PIR: $str", "Worksforme", Wx::wxOK | Wx::wxCENTRE, $main );
 	return;
 }
 
@@ -247,27 +386,27 @@ sub about {
 	my ($main) = @_;
 
 	my $about = Wx::AboutDialogInfo->new;
-	$about->SetName("Padre::Plugin::Parrot");
-	$about->SetDescription(
-		"This plugin currently provides a naive syntax highlighting for PASM files\n" .
-		"If you have Parrot compiled on your system it can also provide execution of\n" .
-		"PASM files\n"
-	);
+	$about->SetName(__PACKAGE__);
+	$about->SetDescription( "This plugin currently provides a naive syntax highlighting for PASM files\n"
+			. "If you have Parrot compiled on your system it can also provide execution of\n"
+			. "PASM files\n" );
 	$about->SetVersion($VERSION);
-	Wx::AboutBox( $about );
+	Wx::AboutBox($about);
 	return;
 }
 
-sub show_help { 
+sub show_help {
 	my $main = Padre->ide->wx->main;
+
 	#print "$main->{help}\n";
-	if ($ENV{PARROT_DIR}) {
-		my $path = File::Spec->catfile($ENV{PARROT_DIR}, 'docs');
-		my $doc    = Padre::Document->new;
+	if ( $ENV{PARROT_DIR} ) {
+		my $path = File::Spec->catfile( $ENV{PARROT_DIR}, 'docs' );
+		my $doc = Padre::Document->new;
 		$doc->{original_content} = $pod;
+
 		#my $doc = Padre::Document->new( filename => $path );
 		$doc->set_mimetype('application/x-pod');
-		$main->{help}->help($doc); 
+		$main->{help}->help($doc);
 	} else {
 		$main->{help}->help('Padre::Plugin::Parrot');
 	}
@@ -275,7 +414,6 @@ sub show_help {
 	$main->{help}->SetFocus;
 	$main->{help}->Show(1);
 }
-
 
 package Px;
 
