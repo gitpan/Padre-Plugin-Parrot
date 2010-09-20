@@ -6,7 +6,7 @@ use warnings;
 use Padre::Document ();
 use Padre::Util     ();
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 our @ISA     = 'Padre::Document';
 
 # Slightly less naive way to parse and colorize pasm files
@@ -61,11 +61,11 @@ sub colorize {
 			_color( $editor, 'Padre::Constant::PADRE_GREEN', $i, 0 );
 			next;
 		}
-		if ( $lines[$i] =~ /^\s*($keywords)\s*$/ ) {    #   end
+		if ( $lines[$i] =~ /^\s*($keywords)\s*$/ ) { #   end
 			_color( $editor, 'Padre::Constant::PADRE_BLUE', $i, 0 );
 			next;
 		}
-		if ( $lines[$i] =~ /^\s*($keywords)\s*(([\'\"])[^\3]*\3|\$?[ISPN]\d+)\s*$/ ) {    #   print "abc"
+		if ( $lines[$i] =~ /^\s*($keywords)\s*(([\'\"])[^\3]*\3|\$?[ISPN]\d+)\s*$/ ) { #   print "abc"
 			my $keyword = $1;
 			my $string  = $2;
 			my $loc     = index( $lines[$i], $keyword );
@@ -78,14 +78,14 @@ sub colorize {
 			}
 			next;
 		}
-		if ( $lines[$i] =~ /^\s*($keywords)\s*(.*)$/ ) {    # get_params "0", P0
+		if ( $lines[$i] =~ /^\s*($keywords)\s*(.*)$/ ) { # get_params "0", P0
 			my $keyword = $1;
 			my $other   = $2;
 
 			my $loc = index( $lines[$i], $keyword );
 			_color( $editor, 'Padre::Constant::PADRE_BLUE', $i, $loc, length($keyword) );
 
-			my ( $first, $second ) = split /,/, $other, 2;    # breaks if string is the first element
+			my ( $first, $second ) = split /,/, $other, 2; # breaks if string is the first element
 			my $endloc2 = gg( $editor, $first, $i, $lines[$i], $loc + length($keyword) );
 			if ( not defined $endloc2 ) {
 
@@ -136,7 +136,7 @@ sub _color {
 		$length = $editor->GetLineEndPosition($line) - $start;
 	}
 
-	no strict "refs";    ## no critic
+	no strict "refs"; ## no critic
 	$editor->StartStyling( $start, $color->() );
 	$editor->SetStyling( $length, $color->() );
 	return;
@@ -165,7 +165,21 @@ sub comment_lines_str {
 
 1;
 
-# Copyright 2008 Gabor Szabo.
-# LICENSE
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl 5 itself.
+__END__
+
+=head1 NAME
+
+Padre::Plugin::Document::PASM - A PASM Document
+
+=head1 AUTHOR
+
+Gabor Szabo L<http://szabgab.com/>
+
+Ahmad M. Zawawi C<< <ahmad.zawawi at gmail.com> >>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2008-2010 Padre Developers as in Parrot.pm
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl 5 itself.

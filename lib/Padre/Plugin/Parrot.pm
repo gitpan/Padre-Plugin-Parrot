@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.008;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 use Padre::Wx ();
 
@@ -186,15 +186,6 @@ Automatically colorize any file type if it does not have a specified token to co
 =back
 
 
-=head1 COPYRIGHT
-
-Copyright 2008-2009 Gabor Szabo. L<http://szabgab.com/>
-
-=head1 LICENSE
-
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl 5 itself.
-
 =cut
 
 my $pod = <<'POD';
@@ -209,7 +200,7 @@ L<$PARROT_DIR/docs/intro.pod>
 POD
 
 sub padre_interfaces {
-	return 'Padre::Plugin' => 0.41;
+	return 'Padre::Plugin' => 0.43;
 }
 
 sub plugin_name {
@@ -219,8 +210,9 @@ sub plugin_name {
 sub menu_plugins_simple {
 	my $self = shift;
 	return $self->plugin_name => [
-		'About' => sub { $self->about },
-		'PIR 2 PBC' => sub { $self->pir2pbc },
+		'About'        => sub { $self->about },
+		'Open Example' => sub { $self->open_example },
+		'PIR 2 PBC'    => sub { $self->pir2pbc },
 
 		#'Help'                                        => \&show_help,
 
@@ -235,7 +227,7 @@ sub registered_documents {
 
 # TODO, Planning the syntax highlighting feature:
 # -------------------------------
-# let the user regiser 
+# let the user regiser
 # mime-type, Path/to/language.pge, Name, Description?
 # or
 # mime-type, Path/to/language.exe, Name, Description?
@@ -243,22 +235,22 @@ sub registered_documents {
 # Though as this is only for personal use on the users own computer
 # for now, we don't really need a description field but maybe the user
 # wants to add comments.
-# Name must be ASCII string without 
-# We can recognize if this is a .pge file or an executable 
+# Name must be ASCII string without
+# We can recognize if this is a .pge file or an executable
 # (.exe on windows nothing on Unix) but we might also provide a check-box
 # so the user can configure this.
 
 # We ave this information in a database or config file
-# We read this information at load time and based on this change the 
+# We read this information at load time and based on this change the
 # provided_highlighters and highlighting_mime_types functions
 #
 # With the module name being Padre::Plugin::HL::Name  (using the Name the user gave us)
 # the module is virtual, only exists in memory
 
 my @highlighters = (
-	['Padre::Document::PIR',  'PIR in Perl 5',  'PIR syntax highlighting with Perl 5 regular expressions'],
-	['Padre::Document::PASM', 'PASM in Perl 5', 'PASM syntax highlighting with Perl 5 regular expressions'],
-	['Padre::Plugin::Parrot', 'Parrot PGE',     'Using the PGE engine for highlighting'],
+	[ 'Padre::Document::PIR',  'PIR in Perl 5',  'PIR syntax highlighting with Perl 5 regular expressions' ],
+	[ 'Padre::Document::PASM', 'PASM in Perl 5', 'PASM syntax highlighting with Perl 5 regular expressions' ],
+	[ 'Padre::Plugin::Parrot', 'Parrot PGE',     'Using the PGE engine for highlighting' ],
 );
 
 my %highlighter_mimes = (
@@ -266,36 +258,42 @@ my %highlighter_mimes = (
 	'Padre::Document::PASM' => ['application/x-pasm'],
 );
 
-# [mime-type,    path-to-pbc-or-exe,  'NameWithoutSpace', 'Description'] 
+# [mime-type,    path-to-pbc-or-exe,  'NameWithoutSpace', 'Description']
 my @config;
-if ($ENV{RAKUDO_DIR}) {
-	push @config, ['application/x-perl6', "$ENV{RAKUDO_DIR}/perl6.pbc",       'Perl6', 'Perl 6 via Parrot and perl6.pbc'];
+if ( $ENV{RAKUDO_DIR} ) {
+	push @config, [ 'application/x-perl6', "$ENV{RAKUDO_DIR}/perl6.pbc", 'Perl6', 'Perl 6 via Parrot and perl6.pbc' ];
 }
-if ($ENV{CARDINAL_DIR}) {
-	push @config, ['application/x-ruby',  "$ENV{CARDINAL_DIR}/cardinal.pbc",  'Ruby',  'Ruby via Cardinal on Parrot and cardinal.pbc'];
+if ( $ENV{CARDINAL_DIR} ) {
+	push @config,
+		[
+		'application/x-ruby', "$ENV{CARDINAL_DIR}/cardinal.pbc", 'Ruby',
+		'Ruby via Cardinal on Parrot and cardinal.pbc'
+		];
 }
 
 use Padre::Plugin::Parrot::HL;
 foreach my $e (@config) {
-	my ($mime_type, $path, $name, $description) = @$e;
+	my ( $mime_type, $path, $name, $description ) = @$e;
 	next if not -e $path;
+
 	# TODO check other values as well
 
-	my $pbc	= ($path =~ /\.pbc$/ ? 1 : 0);
-	my $module = 'Parrot::Plugin::HL::' . ($pbc ? 'PBC::' : '') . $name;
-	my $display_name = "Parrot/" . ($pbc ? 'PBC' : 'EXE') . "/$name";
+	my $pbc = ( $path =~ /\.pbc$/ ? 1 : 0 );
+	my $module = 'Parrot::Plugin::HL::' . ( $pbc ? 'PBC::' : '' ) . $name;
+	my $display_name = "Parrot/" . ( $pbc ? 'PBC' : 'EXE' ) . "/$name";
 	{
+
 		# create virtual namespace and colorize() function.
-		# maybe I only need to create 
-		
-		my $sub = sub { return ($pbc, $path) };
-		my $isa = $module . '::ISA';
+		# maybe I only need to create
+
+		my $sub      = sub { return ( $pbc, $path ) };
+		my $isa      = $module . '::ISA';
 		my $function = $module . '::pbc_path';
 		no strict 'refs';
 		@$isa = ('Padre::Plugin::Parrot::HL');
 		*{$function} = $sub;
 	}
-	push @highlighters, [$module, $display_name, $description];
+	push @highlighters, [ $module, $display_name, $description ];
 	$highlighter_mimes{$module} = [$mime_type];
 }
 
@@ -312,7 +310,7 @@ sub plugin_enable {
 
 	return if not $ENV{PARROT_DIR};
 
-	return 1 if $main::parrot;    # avoid crash when duplicate calling
+	return 1 if $main::parrot; # avoid crash when duplicate calling
 
 	local @INC = (
 		"$ENV{PARROT_DIR}/ext/Parrot-Embed/blib/lib",
@@ -331,7 +329,7 @@ sub plugin_enable {
 	};
 	if ($@) {
 		warn $@;
-		return;
+		return 1;
 	}
 
 	return 1;
@@ -386,16 +384,25 @@ END_PIR
 
 sub pir2pbc {
 	my $main = Padre->ide->wx->main;
-	my $doc = Padre::Current->document;
+	my $doc  = Padre::Current->document;
 	return if not $doc;
 	my $filename = $doc->filename;
 	return if not $filename or $filename !~ /\.pir$/i;
 	$doc->pir2pbc;
 }
 
-sub about {
-	my ($main) = @_;
+sub open_example {
+	require File::ShareDir;
+	my $dir = File::Spec->catdir(
+		File::ShareDir::dist_dir('Padre-Plugin-Parrot'),
+		'examples'
+	);
 
+	my $main = Padre->ide->wx->main;
+	return $main->open_file_dialog($dir);
+}
+
+sub about {
 	my $about = Wx::AboutDialogInfo->new;
 	$about->SetName(__PACKAGE__);
 	$about->SetDescription( "This plugin currently provides a naive syntax highlighting for PASM files\n"
@@ -428,11 +435,6 @@ sub show_help {
 
 1;
 
-# Copyright 2008 Gabor Szabo.
-# LICENSE
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl 5 itself.
-
 #pasm:
 # brace_highlight: 00ffff
 # colors:
@@ -443,3 +445,26 @@ sub show_help {
 #  PASM_COMMENT:     0000aa
 #  PASM_POD:         0000ff
 #
+
+__END__
+
+=head1 NAME
+
+Padre::Plugin::Parrot - Padre plugin for Parrot
+
+=head1 SYNOPSIS
+
+After installation when you run Padre there should be a menu option Plugins/Parrot.
+
+=head1 AUTHOR
+
+Gabor Szabo L<http://szabgab.com/>
+
+Ahmad M. Zawawi C<< <ahmad.zawawi at gmail.com> >>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2008-2010 Padre Developers as in Parrot.pm
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl 5 itself.

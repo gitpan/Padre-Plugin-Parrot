@@ -10,6 +10,7 @@ inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Padre/Document/PASM.pm
 lib/Padre/Document/PIR.pm
+lib/Padre/HelpProvider/PIR.pm
 lib/Padre/Plugin/Parrot.pm
 lib/Padre/Plugin/Parrot/ColorizeTask.pm
 lib/Padre/Plugin/Parrot/HL.pm
@@ -23,3 +24,6 @@ share/examples/pir/03_hello_with_named_register.pir
 share/examples/pir/10_squares.pir
 share/examples/pir/11_fibonacci.pir
 t/00-load.t
+t/01-compile.t
+t/02-pod.t
+t/03-copyright.t
