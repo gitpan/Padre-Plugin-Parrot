@@ -1,4 +1,9 @@
 package Padre::Document::PIR;
+BEGIN {
+  $Padre::Document::PIR::VERSION = '0.28';
+}
+
+# ABSTRACT: A PIR Document
 
 use 5.008;
 use strict;
@@ -11,7 +16,6 @@ use Padre::Document ();
 use Padre::Util     ();
 use Padre::Constant;
 
-our $VERSION = '0.27';
 our @ISA     = 'Padre::Document';
 
 # Naive way to parse and colorize pir files
@@ -92,27 +96,42 @@ sub pir2pbc {
 }
 
 sub get_help_provider {
-	require Padre::HelpProvider::PIR;
-	return Padre::HelpProvider::PIR->new;
+	require Padre::Help::PIR;
+	return Padre::Help::PIR->new;
 }
 
 1;
-
 __END__
+=pod
 
 =head1 NAME
 
-Padre::Plugin::Document::PIR - Padre PIR Document
+Padre::Document::PIR - A PIR Document
 
-=head1 AUTHOR
+=head1 VERSION
+
+version 0.28
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
 
 Gabor Szabo L<http://szabgab.com/>
 
-Ahmad M. Zawawi C<< <ahmad.zawawi at gmail.com> >>
+=item *
+
+Ahmad M. Zawawi <ahmad.zawawi@gmail.com>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2008-2010 Padre Developers as in Parrot.pm
+This software is copyright (c) 2010 by Gabor Szabo.
 
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl 5 itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+

@@ -1,206 +1,24 @@
 package Padre::Plugin::Parrot;
+BEGIN {
+  $Padre::Plugin::Parrot::VERSION = '0.28';
+}
+
+# ABSTRACT: Experimental Padre plugin for Parrot
+
+use 5.008;
 use strict;
 use warnings;
-use 5.008;
-
-our $VERSION = '0.27';
 
 use Padre::Wx ();
-
 use base 'Padre::Plugin';
 
 my $parrot;
 
 # TODO get documentation from parrot/src/ops/*.ops and parrot/docs/pdds/pdd19_pir.pod
 
-=head1 NAME
-
-Padre::Plugin::Parrot - Experimental Padre plugin for Parrot
-
-=head1 SYNOPSIS
-
-This Plugin provides several features
-
-=over 4
-
-=item *
-
-Syntax highlighting via the PGE parse tree for languages using PCT - the Parrot Compiler Toolkit
-
-=item *
-
-Syntax highlighting of PIR and PASM files using Perl 5 regular expressions
-
-=item *
-
-Embedding of Parrot to allow extending Padre using languages running in Parrot
-
-=back
-
-After installation you need to enable the plugin via the Plugin Manager of Padre.
-Once that is done there should be a menu option Plugins/Parrot with several submenus.
-
-About is just some short explanation
-
-The other menu options will count the number of characters in the current document
-using the current Perl 5 interpreter or PASM running on top of Parrot.
-Later we add other implementations running on top of Parrot.
-
-The syntax highlighting provided by this module can be enabled on a perl file-type
-(actually mime-type) base in the Edit/Preferences/Mime-types dialog.
-
-=head1 INSTALLATION
-
-This whole plugin is quite experimental. So is the documentation. 
-I hope the plugin can work with released and installed versions of Parrot as well but
-I have never tried that. Let me outline how I install the dependencies.
-
-It is quite simple though it has several steps in it.
-
-Later we'll make this more simple.
-
-I start with Rakudo (the implementation of Perl 6 on Parrot).
-
-=head2 Install Rakudo
-
- $ cd $HOME
- $ mkdir work
- $ cd work
- $ git clone git://github.com/rakudo/rakudo.git
- $ cd rakudo
- $ perl Configure.pl --gen-parrot
- $ make
-
-=head2 Configure env variables
-
-Configure PARROT_DIR to point to the root of parrot
-Configure RAKUDO_DIR to point to the directory where rakudo was checked out.
-(I have these in the .bashrc)
-
- $ export PARROT_DIR=$HOME/work/rakudo/parrot
- $ export RAKUDO_DIR=$HOME/work/rakudo
-
-
-Once this is done if you run Padre now you can enable Parrot/PGE highlighting of
-Perl 6 files via the Edit/Preferences/Mime-types dialog.
-
-=head2 Adding Cardinal (Ruby) highlighting
-
-In order to support Ruby highlighting one needs to configure the CARDINAL_DIR 
-environment variable to point to the place where the cardinal.pbc can be located.
-
-  $ cd $HOME/work
-  $ git clone git://github.com/cardinal/cardinal.git
-  $ export CARDINAL_DIR=$HOME/work/cardinal         # add this also to .bashrc
-  $ cd $PARROD_DIR
-  $ mkdir languages
-  $ cd language
-  $ ln -s $CARDINAL_DIR
-  $ cd cardinal
-  $ perl Configure.pl
-  $ make
-
-Once this is done if you run Padre now you can enable Parrot/PGE highlighting of
-Ruby files via the Edit/Preferences/Mime-types dialog.
-
-=head2 Embedding Parrot
-
-=head3 Configure LD_LIBRARY_PATH (also in .bashrc)
-
- $ export LD_LIBRARY_PATH=$PARROT_DIR/blib/lib/
- 
-=head3 Build Parrot::Embed
-
-  $ cd $PARROT_DIR/ext/Parrot-Embed/
-  ./Build realclean
-  perl Build.PL
-  ./Build
-  ./Build test
-
-The test will give a warning like this, but will pass:
-
- Parrot VM: Can't stat no file here, code 2.
- error:imcc:syntax error, unexpected IDENTIFIER
-	in file 'EVAL_2' line 1
-
-Now if you run Padre and enable Padre::Plugin::Parrot 
-it will have an embedded Parrot interpreter that can run
-code written in PIR. (See the Plugins/Parrot/Count Characters...)
-menu options.
-
-
-=head1 Related Tickets in Parrot
-
-L<https://trac.parrot.org/parrot/ticket/77>
-L<https://trac.parrot.org/parrot/ticket/74>
-L<https://trac.parrot.org/parrot/ticket/76>
-L<https://trac.parrot.org/parrot/ticket/79>
-L<https://trac.parrot.org/parrot/ticket/77>
-
-=head1 Adding more highlightings
-
-In order to add more syntax highlighters one needs to
-
-=over 4
-
-=item 1)
-
-make sure the relevant language can compile to a pbc file
-
-=item 2)
-
-add and entry to the @config variable.
-
-=item 3)
-
-add color codes to the missing tokens in L<Padre::Plugin::Parrot::ColorizeTask>
-
-=back
-
-=head1 TODO
-
-=over 4
-
-=item *
-
-Eliminate the need for environment variables
-
-=item *
-
-Make the installations more simple, make sure it can work with released and installed versions of Parrot, Rakudo etc.
-
-=item *
-
-Allow the addition and configuration of more .pbc files (or executables) to @config (and keep it
-in the Padre config database).
-
-=item *
-
-Separate the token lists for the various languages
-L<Padre::Plugin::Parrot::ColorizeTask>
-
-=item *
-
-Automatically colorize any file type if it does not have a specified token to colors table.
-
-=back
-
-
-=cut
-
-my $pod = <<'POD';
-
-=head1 Parrot
-
-Some text
-L<$PARROT_DIR/docs/intro.pod>
-
-=cut
-
-POD
 
 sub padre_interfaces {
-	return 'Padre::Plugin' => 0.43;
+	return 'Padre::Plugin' => 0.47;
 }
 
 sub plugin_name {
@@ -408,7 +226,7 @@ sub about {
 	$about->SetDescription( "This plugin currently provides a naive syntax highlighting for PASM files\n"
 			. "If you have Parrot compiled on your system it can also provide execution of\n"
 			. "PASM files\n" );
-	$about->SetVersion($VERSION);
+	$about->SetVersion($Padre::Plugin::Parrot::VERSION);
 	Wx::AboutBox($about);
 	return;
 }
@@ -416,13 +234,12 @@ sub about {
 sub show_help {
 	my $main = Padre->ide->wx->main;
 
-	#print "$main->{help}\n";
 	if ( $ENV{PARROT_DIR} ) {
 		my $path = File::Spec->catfile( $ENV{PARROT_DIR}, 'docs' );
 		my $doc = Padre::Document->new;
-		$doc->{original_content} = $pod;
+		# to enable PodWeaver to work
+		$doc->{original_content} = "\n=" . "head1 Parrot\n\nSome text\nL<\$PARROT_DIR/docs/intro.pod>\n=" . 'cut';
 
-		#my $doc = Padre::Document->new( filename => $path );
 		$doc->set_mimetype('application/x-pod');
 		$main->{help}->help($doc);
 	} else {
@@ -445,26 +262,205 @@ sub show_help {
 #  PASM_COMMENT:     0000aa
 #  PASM_POD:         0000ff
 #
-
 __END__
+=pod
 
 =head1 NAME
 
-Padre::Plugin::Parrot - Padre plugin for Parrot
+Padre::Plugin::Parrot - Experimental Padre plugin for Parrot
+
+=head1 VERSION
+
+version 0.28
 
 =head1 SYNOPSIS
 
-After installation when you run Padre there should be a menu option Plugins/Parrot.
+This Plugin provides several features
 
-=head1 AUTHOR
+=over 4
+
+=item *
+
+Syntax highlighting via the PGE parse tree for languages using PCT - the Parrot Compiler Toolkit
+
+=item *
+
+Syntax highlighting of PIR and PASM files using Perl 5 regular expressions
+
+=item *
+
+Embedding of Parrot to allow extending Padre using languages running in Parrot
+
+=back
+
+After installation you need to enable the plugin via the Plugin Manager of Padre.
+Once that is done there should be a menu option Plugins/Parrot with several submenus.
+
+About is just some short explanation
+
+The other menu options will count the number of characters in the current document
+using the current Perl 5 interpreter or PASM running on top of Parrot.
+Later we add other implementations running on top of Parrot.
+
+The syntax highlighting provided by this module can be enabled on a perl file-type
+(actually mime-type) base in the Edit/Preferences/Mime-types dialog.
+
+=head1 NAME
+
+=head1 INSTALLATION
+
+This whole plugin is quite experimental. So is the documentation.
+I hope the plugin can work with released and installed versions of Parrot as well but
+I have never tried that. Let me outline how I install the dependencies.
+
+It is quite simple though it has several steps in it.
+
+Later we'll make this more simple.
+
+I start with Rakudo (the implementation of Perl 6 on Parrot).
+
+=head2 Install Rakudo
+
+ $ cd $HOME
+ $ mkdir work
+ $ cd work
+ $ git clone git://github.com/rakudo/rakudo.git
+ $ cd rakudo
+ $ perl Configure.pl --gen-parrot
+ $ make
+
+=head2 Configure env variables
+
+Configure PARROT_DIR to point to the root of parrot
+Configure RAKUDO_DIR to point to the directory where rakudo was checked out.
+(I have these in the .bashrc)
+
+ $ export PARROT_DIR=$HOME/work/rakudo/parrot
+ $ export RAKUDO_DIR=$HOME/work/rakudo
+
+Once this is done if you run Padre now you can enable Parrot/PGE highlighting of
+Perl 6 files via the Edit/Preferences/Mime-types dialog.
+
+=head2 Adding Cardinal (Ruby) highlighting
+
+In order to support Ruby highlighting one needs to configure the CARDINAL_DIR
+environment variable to point to the place where the cardinal.pbc can be located.
+
+  $ cd $HOME/work
+  $ git clone git://github.com/cardinal/cardinal.git
+  $ export CARDINAL_DIR=$HOME/work/cardinal         # add this also to .bashrc
+  $ cd $PARROD_DIR
+  $ mkdir languages
+  $ cd language
+  $ ln -s $CARDINAL_DIR
+  $ cd cardinal
+  $ perl Configure.pl
+  $ make
+
+Once this is done if you run Padre now you can enable Parrot/PGE highlighting of
+Ruby files via the Edit/Preferences/Mime-types dialog.
+
+=head2 Embedding Parrot
+
+=head3 Configure LD_LIBRARY_PATH (also in .bashrc)
+
+ $ export LD_LIBRARY_PATH=$PARROT_DIR/blib/lib/
+
+=head3 Build Parrot::Embed
+
+  $ cd $PARROT_DIR/ext/Parrot-Embed/
+  ./Build realclean
+  perl Build.PL
+  ./Build
+  ./Build test
+
+The test will give a warning like this, but will pass:
+
+ Parrot VM: Can't stat no file here, code 2.
+ error:imcc:syntax error, unexpected IDENTIFIER
+	in file 'EVAL_2' line 1
+
+Now if you run Padre and enable Padre::Plugin::Parrot
+it will have an embedded Parrot interpreter that can run
+code written in PIR. (See the Plugins/Parrot/Count Characters...)
+menu options.
+
+=head1 Related Tickets in Parrot
+
+L<https://trac.parrot.org/parrot/ticket/77>
+L<https://trac.parrot.org/parrot/ticket/74>
+L<https://trac.parrot.org/parrot/ticket/76>
+L<https://trac.parrot.org/parrot/ticket/79>
+L<https://trac.parrot.org/parrot/ticket/77>
+
+=head1 Adding more highlightings
+
+In order to add more syntax highlighters one needs to
+
+=over 4
+
+=item 1)
+
+make sure the relevant language can compile to a pbc file
+
+=item 2)
+
+add and entry to the @config variable.
+
+=item 3)
+
+add color codes to the missing tokens in L<Padre::Plugin::Parrot::ColorizeTask>
+
+=back
+
+=head1 TODO
+
+=over 4
+
+=item *
+
+Eliminate the need for environment variables
+
+=item *
+
+Make the installations more simple, make sure it can work with released and installed versions of Parrot, Rakudo etc.
+
+=item *
+
+Allow the addition and configuration of more .pbc files (or executables) to @config (and keep it
+in the Padre config database).
+
+=item *
+
+Separate the token lists for the various languages
+L<Padre::Plugin::Parrot::ColorizeTask>
+
+=item *
+
+Automatically colorize any file type if it does not have a specified token to colors table.
+
+=back
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
 
 Gabor Szabo L<http://szabgab.com/>
 
-Ahmad M. Zawawi C<< <ahmad.zawawi at gmail.com> >>
+=item *
+
+Ahmad M. Zawawi <ahmad.zawawi@gmail.com>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2008-2010 Padre Developers as in Parrot.pm
+This software is copyright (c) 2010 by Gabor Szabo.
 
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl 5 itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+

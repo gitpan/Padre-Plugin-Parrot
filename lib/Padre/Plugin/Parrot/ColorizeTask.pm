@@ -1,11 +1,15 @@
 package Padre::Plugin::Parrot::ColorizeTask;
+BEGIN {
+  $Padre::Plugin::Parrot::ColorizeTask::VERSION = '0.28';
+}
+
+# ABSTRACT: A Colorizer Task
 
 use strict;
 use warnings;
 use base 'Padre::Task';
 use Scalar::Util ();
 
-our $VERSION        = '0.27';
 our $thread_running = 0;
 
 # This is run in the main thread before being handed
@@ -219,22 +223,37 @@ sub run {
 }
 
 1;
-
 __END__
+=pod
 
 =head1 NAME
 
 Padre::Plugin::Parrot::ColorizeTask - A Colorizer Task
 
-=head1 AUTHOR
+=head1 VERSION
+
+version 0.28
+
+=head1 AUTHORS
+
+=over 4
+
+=item *
 
 Gabor Szabo L<http://szabgab.com/>
 
-Ahmad M. Zawawi C<< <ahmad.zawawi at gmail.com> >>
+=item *
+
+Ahmad M. Zawawi <ahmad.zawawi@gmail.com>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2008-2010 Padre Developers as in Parrot.pm
+This software is copyright (c) 2010 by Gabor Szabo.
 
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl 5 itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+

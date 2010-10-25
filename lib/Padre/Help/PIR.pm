@@ -1,4 +1,9 @@
-package Padre::HelpProvider::PIR;
+package Padre::Help::PIR;
+BEGIN {
+  $Padre::Help::PIR::VERSION = '0.28';
+}
+
+# ABSTRACT: PIR Help Provider
 
 use 5.008;
 use strict;
@@ -7,11 +12,9 @@ use warnings;
 use Cwd ();
 use Padre::Logger;
 use Padre::Help            ();
-use Padre::DocBrowser::POD ();
 use Padre::Pod2HTML        ();
 use Padre::Util            ();
 
-our $VERSION = '0.27';
 our @ISA     = 'Padre::Help';
 
 #
@@ -119,11 +122,6 @@ sub help_render {
 	$html = Padre::Pod2HTML->pod2html($pod);
 	TRACE($html) if DEBUG;
 
-	# Render using perldoc pseudo code package
-	#my $pod      = Padre::DocBrowser::POD->new;
-	#my $doc      = $pod->resolve( $topic, $hints );
-	#my $pod_html = $pod->render($doc);
-	#$html = $pod_html->body if $pod_html;
 	return ( $html, $location || $topic );
 }
 
@@ -137,25 +135,45 @@ sub help_list {
 
 1;
 
-__END__
+
+
+=pod
 
 =head1 NAME
 
-Padre::HelpProvider::Perl - Perl 5 Help Provider
+Padre::Help::PIR - PIR Help Provider
+
+=head1 VERSION
+
+version 0.28
 
 =head1 DESCRIPTION
 
-Perl 5 Help index is built here and rendered.
+PIR Help index is built here and rendered.
 
-=head1 AUTHOR
+=head1 AUTHORS
+
+=over 4
+
+=item *
 
 Gabor Szabo L<http://szabgab.com/>
 
-Ahmad M. Zawawi C<ahmad.zawawi@gmail.com>
+=item *
+
+Ahmad M. Zawawi <ahmad.zawawi@gmail.com>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2008-2010 Padre Developers as in Parrot.pm
+This software is copyright (c) 2010 by Gabor Szabo.
 
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl 5 itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+
+
+__END__
+
