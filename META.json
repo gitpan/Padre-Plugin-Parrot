@@ -44,7 +44,7 @@
          "url" : "http://svn.perlide.org/padre/trunk/Padre-Plugin-Parrot/"
       }
    },
-   "version" : "0.28",
+   "version" : "0.29",
    "x_Dist_Zilla" : {
       "plugins" : [
          {
@@ -126,6 +126,11 @@
             "class" : "Dist::Zilla::Plugin::CompileTests",
             "name" : "Dist::Zilla::PluginBundle::PadrePlugin/Dist::Zilla::Plugin::CompileTests",
             "version" : "1.101800"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::LoadTests",
+            "name" : "Dist::Zilla::PluginBundle::PadrePlugin/Dist::Zilla::Plugin::LoadTests",
+            "version" : "0.03"
          },
          {
             "class" : "Dist::Zilla::Plugin::EOLTests",

@@ -1,6 +1,6 @@
 package Padre::Plugin::Parrot::HL;
 BEGIN {
-  $Padre::Plugin::Parrot::HL::VERSION = '0.28';
+  $Padre::Plugin::Parrot::HL::VERSION = '0.29';
 }
 
 # ABSTRACT: An HL Colorizer
@@ -69,7 +69,7 @@ Padre::Plugin::Parrot::HL - An HL Colorizer
 
 =head1 VERSION
 
-version 0.28
+version 0.29
 
 =head1 AUTHORS
 

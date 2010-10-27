@@ -1,6 +1,6 @@
 package Padre::Plugin::Parrot::ColorizeTask;
 BEGIN {
-  $Padre::Plugin::Parrot::ColorizeTask::VERSION = '0.28';
+  $Padre::Plugin::Parrot::ColorizeTask::VERSION = '0.29';
 }
 
 # ABSTRACT: A Colorizer Task
@@ -232,7 +232,7 @@ Padre::Plugin::Parrot::ColorizeTask - A Colorizer Task
 
 =head1 VERSION
 
-version 0.28
+version 0.29
 
 =head1 AUTHORS
 
