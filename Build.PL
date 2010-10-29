@@ -20,7 +20,7 @@ my %module_build_args = (
     'Ahmad M. Zawawi <ahmad.zawawi@gmail.com>'
   ],
   'dist_name' => 'Padre-Plugin-Parrot',
-  'dist_version' => '0.29',
+  'dist_version' => '0.30',
   'license' => 'perl',
   'module_name' => 'Padre::Plugin::Parrot',
   'recommends' => {},

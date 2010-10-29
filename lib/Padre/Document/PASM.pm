@@ -1,6 +1,6 @@
 package Padre::Document::PASM;
 BEGIN {
-  $Padre::Document::PASM::VERSION = '0.29';
+  $Padre::Document::PASM::VERSION = '0.30';
 }
 
 # ABSTRACT: A PASM Document
@@ -177,7 +177,7 @@ Padre::Document::PASM - A PASM Document
 
 =head1 VERSION
 
-version 0.29
+version 0.30
 
 =head1 AUTHORS
 

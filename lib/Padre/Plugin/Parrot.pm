@@ -1,6 +1,6 @@
 package Padre::Plugin::Parrot;
 BEGIN {
-  $Padre::Plugin::Parrot::VERSION = '0.29';
+  $Padre::Plugin::Parrot::VERSION = '0.30';
 }
 
 # ABSTRACT: Experimental Padre plugin for Parrot
@@ -271,7 +271,7 @@ Padre::Plugin::Parrot - Experimental Padre plugin for Parrot
 
 =head1 VERSION
 
-version 0.29
+version 0.30
 
 =head1 SYNOPSIS
 
