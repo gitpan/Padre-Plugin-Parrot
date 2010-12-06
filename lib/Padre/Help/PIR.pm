@@ -1,6 +1,6 @@
 package Padre::Help::PIR;
 BEGIN {
-  $Padre::Help::PIR::VERSION = '0.30';
+  $Padre::Help::PIR::VERSION = '0.31';
 }
 
 # ABSTRACT: PIR Help Provider
@@ -145,7 +145,7 @@ Padre::Help::PIR - PIR Help Provider
 
 =head1 VERSION
 
-version 0.30
+version 0.31
 
 =head1 DESCRIPTION
 

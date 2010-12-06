@@ -1,6 +1,6 @@
 package Padre::Document::PIR;
 BEGIN {
-  $Padre::Document::PIR::VERSION = '0.30';
+  $Padre::Document::PIR::VERSION = '0.31';
 }
 
 # ABSTRACT: A PIR Document
@@ -110,7 +110,7 @@ Padre::Document::PIR - A PIR Document
 
 =head1 VERSION
 
-version 0.30
+version 0.31
 
 =head1 AUTHORS
 
